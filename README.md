@@ -1,57 +1,71 @@
-## About Laravel
+# Snappy Tech Task
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Background
+This solution to the tech task has been written using Laravel. While I could have completed the task more
+efficiently using a different method, I decided to use this opportunity to refresh my knowledge on Laravel.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Docker configuration has been included
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Docker
+To help run artisan commands, a "workspace" container and small shell script have been included.
+To invoke commands inside the workspace, use this `ws` script, e.g.
+```
+./ws php artisan ...
+```
 
-## Learning Laravel
+## Console import command
+An artisan console command (postcode:import) was written to download postcode data from the example URL
+provided and import it into a database table. This has been built out using a simple interface and a
+specific implementation, which is then configured in the service provider. This will allow new implementations
+to be added easily.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+There are some cleanup tasks missing from this implementation, which would close files and delete temporary
+files.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Public APIs
+```
+GET /stores
+GET /stores/nearby?postcode=AA999AA
+GET /stores/deliver?postcode=AA999AA
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+These return a list of stores. The first returns all stores.
+The second returns them sorted by distance from postcode.
+The third returns those which will deliver to the postcode.
 
-## Laravel Sponsors
+No pagination is currently implemented, as it is expected that this initial exercise would be run with
+only a small number of stores.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+All distances are in meters.
 
-### Premium Partners
+## Private API
+```
+POST /stores
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+This accepts a body as shown below, and will create a new store in the DB.
+```json
+{
+    "name": "Name of store",
+    "latitude": "58.1234",
+    "longitude": "-1.259",
+    "open": true,
+    "store_type": "store",
+    "max_delivery_distance": 1000.00
+}
+```
 
-## Contributing
+This requires a valid JWT Bearer token in the Authorization header. This has been implemented in a basic manner to just check for a valid, non-expired JWT
+but it would be expected that more checks would be performed.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Please remember all distances are in meters.
 
-## Code of Conduct
+For testing purposes, there is an artisan command to generate valid or expired tokens:
+```
+./ws php artisan jwt:issue [--expired]
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Further steps
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This code would require integration into the existing application, as well as for far more tests to be written.
+Pagination would be a must, as would further checks on the JWT (or other auth method).
