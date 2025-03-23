@@ -4,9 +4,13 @@
 This solution to the tech task has been written using Laravel. While I could have completed the task more
 efficiently using a different method, I decided to use this opportunity to refresh my knowledge on Laravel.
 
-Docker configuration has been included
-
 ### Docker
+
+Docker compose configuration has been included for ease of development and testing. To bring this up, use:
+```
+docker compose -f compose.dev.yaml up -d
+```
+
 To help run artisan commands, a "workspace" container and small shell script have been included.
 To invoke commands inside the workspace, use this `ws` script, e.g.
 ```
